@@ -1,18 +1,11 @@
 {-# OPTIONS --cubical #-}
 
-module prelude where
+module cprelude where
 
 open import Primitives public
 open import Nat public
 
-{-
 infixr 30 _∙_
-infixr 30 _∙₂_
-infix  3 _∎
-infixr 2 _≡⟨_⟩_ _≡⟨⟩_
-infixr 2.5 _≡⟨_⟩≡⟨_⟩_
-infixl 4 _≡$_ _≡$S_
--}
 
 -- Basic theory about paths. These proofs should typically be
 -- inlined. This module also makes equational reasoning work with
@@ -28,6 +21,12 @@ private
 J : {x : A} (P : (y : A) → x ≡ y → Type ℓ) (d : P x (λ _ → x))
     {y : A} (p : x ≡ y) → P y p
 J P d p = transp (λ i → P (p i) λ j → p (i ∧ j)) i0 d
+
+refl : (x : A) → x ≡ x 
+refl x = λ i → x
+
+ap : {B : Type ℓ} {x y : A} (f : A → B) (p : x ≡ y) → f x ≡ f y
+ap f p i = f (p i)
 
 -- hlevels
 isContr : Type ℓ → Type ℓ

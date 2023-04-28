@@ -1,8 +1,8 @@
 {-# OPTIONS #-}
 
-module lecture-notes where
+module ctalk where
 
-open import prelude public hiding (transport ; J)
+open import cprelude public hiding (transport ; J ; refl ; ap)
 open import Nat
 open import IsoToEquiv hiding (fiber ; _≃_ ; isEquiv) 
 
@@ -157,6 +157,11 @@ data _/_ (A : Type) (R : A → A → Type) : Type where
 transport : ∀ {ℓ} {A B : Type ℓ} → A ≡ B → A → B
 transport p x = transp (λ i → p i) i0 x
 
+subst : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
+  → x ≡ y
+  → B x → B y
+subst B p = transport (ap B p)
+
 -- transportRefl doesn't hold trivially
 transportRefl : (x : A) → transport (refl A) x ≡ x
 transportRefl {A = A} x i = transp (λ _ → A) i x
@@ -292,13 +297,48 @@ fst (snd ℕ-Semi) = _+_
 is-set (snd (snd ℕ-Semi)) = isSetℕ
 assoc (snd (snd ℕ-Semi)) = +-assoc
 
+open import ListBin
 
-data Bool : Type where
-  𝟘 : Bool
-  𝟙 : Bool 
+ℕ≃ListBin : ℕ ≃ ListBin
+ℕ≃ListBin = isoToEquiv (iso ℕ→ListBin ListBin→ℕ maps-cancel-r maps-cancel-l)
 
-data ListBin : Type where
-  []    : ListBin
-  _∷_   : (x : Bool) (xs : ListBin) → ListBin
-  drop0 : 𝟘 ∷ [] ≡ []
+isSetListBin : isSet ListBin
+isSetListBin = transport (λ i → isSet (ua ℕ≃ListBin i)) isSetℕ
 
+
+liftSemiGroup : {G : SemiGroup ℓ} {H : Type ℓ} {multH : H → H → H}
+  → (ϕ : fst G ≃ H)
+  → ((x y : _) → fst ϕ (mult G x y) ≡ multH (fst ϕ x) (fst ϕ y))
+  → isSemiGroup H multH 
+liftSemiGroup {ℓ = ℓ} {G = G , multG , sm} {H = H} {multH = multH} ϕ hom =
+  transport (λ i → pred (path i)) sm
+  where
+  pred : Σ[ G ∈ Type ℓ ] (G → G → G) → Type _
+  pred (G , multG) = isSemiGroup G multG
+
+  path : Path (Σ[ G ∈ Type ℓ ] (G → G → G)) (G , multG) (H , multH)
+  fst (path i) = ua ϕ i
+  snd (path i) = help i
+    where
+    help : PathP (λ i →  ua ϕ i →  ua ϕ i →  ua ϕ i) multG multH
+    help = toPathP (funExt λ x → funExt λ y
+      → transportRefl (fst ϕ (multG (invEq ϕ (transport (refl _) x)) (invEq ϕ (transport (refl _) y))))
+       ∙ (ap (fst ϕ) (λ i → multG (invEq ϕ (transportRefl x i)) (invEq ϕ (transportRefl y i)))
+       ∙ (hom (invEq ϕ x) (invEq ϕ y)
+       ∙ λ i → multH (secEq ϕ x i) (secEq ϕ y i))))
+
+
+ListBin-Semi : SemiGroup ℓ-zero
+fst ListBin-Semi = ListBin
+fst (snd ListBin-Semi) = _+LB_
+snd (snd ListBin-Semi) =
+  liftSemiGroup {G = ℕ-Semi} ℕ≃ListBin ℕ→ListBin-pres+
+
+ListBin-Semi≡ℕ-Semi : ListBin-Semi ≡ ℕ-Semi
+ListBin-Semi≡ℕ-Semi = sym (SIP-semiGroup ℕ≃ListBin ℕ→ListBin-pres+)
+
+comm-semi : SemiGroup ℓ → Type ℓ
+comm-semi (G , mult , _) = (x y : G) → mult x y ≡ mult y x
+
+comm-ListBin : comm-semi ListBin-Semi
+comm-ListBin = subst comm-semi (ListBin-Semi≡ℕ-Semi ⁻) +-comm

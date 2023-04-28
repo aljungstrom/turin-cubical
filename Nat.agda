@@ -84,6 +84,19 @@ data ⊥ : Type where
 ℕ-decode (suc n) (suc m) p i = suc (ℕ-decode n m p i)
 
 -- Addition is associative
++-0 : (n : ℕ) → n + 0 ≡ n
++-0 zero i = 0
++-0 (suc n) i = suc (+-0 n i)
+
+suc+ : (n m : ℕ) → suc (n + m) ≡ n + suc m
+suc+ zero m i = suc m
+suc+ (suc n) m i = suc (suc+ n m i)
+
++-comm : ∀ m n → m + n ≡ n + m
++-comm zero n i = +-0 n (~ i)
++-comm (suc m) n i =
+  hcomp (λ k → λ{(i = i0) → suc (+-comm m n (~ k)) ; (i = i1) → n + suc m}) (suc+ n m i)
+
 +-assoc : ∀ m n o → m + (n + o) ≡ (m + n) + o
 +-assoc zero n o _  = n + o
 +-assoc (suc m) n o i = suc (+-assoc m n o i)

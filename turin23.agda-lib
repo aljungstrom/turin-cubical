@@ -1,4 +1,0 @@
-name: turin
-include: .
-depend:
-flags: --cubical --no-import-sorts -WnoUnsupportedIndexedMatch

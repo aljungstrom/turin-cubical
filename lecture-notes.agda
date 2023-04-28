@@ -1,8 +1,8 @@
 {-# OPTIONS #-}
 
-module ctalk where
+module lecture-notes where
 
-open import cprelude public hiding (transport ; J ; refl ; ap)
+open import prelude public hiding (transport ; J ; refl ; ap)
 open import Nat
 open import IsoToEquiv hiding (fiber ; _≃_ ; isEquiv) 
 

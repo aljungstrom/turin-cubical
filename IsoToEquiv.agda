@@ -2,7 +2,7 @@
 
 module IsoToEquiv where
 
-open import cprelude
+open import prelude
 open import Nat
 
 private

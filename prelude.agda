@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical #-}
 
-module cprelude where
+module prelude where
 
 open import Primitives public
 open import Nat public

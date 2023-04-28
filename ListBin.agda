@@ -2,7 +2,7 @@
 
 module ListBin where
 
-open import cprelude hiding (transport ; J)
+open import prelude hiding (transport ; J)
 open import Nat
 open import IsoToEquiv hiding (fiber ; _≃_ ; isEquiv) 
 
